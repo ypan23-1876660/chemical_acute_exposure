@@ -8,25 +8,25 @@ library(RColorBrewer)
 library(cowplot)
 library(gridExtra)
 
-###Read in raw data
+
+######Read in raw data
 data = read.csv("/data/mackanholt_lab/yp/local_chemical_acute_screen/arsenic/17data_R.csv")
 
-#Get variables
-#concentrations = unique(data[c("concentration")])
-#sexes = unique(data[c("sex")])
-
-conc1 = 0.8
-conc2 = 1.5
-
-#Convert "Line" from numeric to factor for graphs 
+#Format data: convert "Line" from numeric to factor for graphs 
 data$line = as.factor(data$line)
 
-#Filter data and calculate mean survival and std mean for plotting
+
+
+######Functions for graphs
+
+###Create line graph for across all exposures and lines for each sex and concentration
+
+#Filter data and calculate mean survival and std mean for plotting line graph
 df_line_graph = data %>% 
   group_by(line, concentration, sex, exposure) %>% 
   summarise(mean_survival = mean(survival_proportion), sd= sd(survival_proportion), std_mean= sd/sqrt(length(rep)))
 
-#Run function
+#Create line graph
 line_graph = function(data, sex, conc) {
   
   #Create graph title
@@ -36,7 +36,7 @@ line_graph = function(data, sex, conc) {
   
   #Get the first letter of sex. Then filter data based on sex and concentration
   sex1 = substr(sex, 1, 1)
-  sex_conc1 = df %>% 
+  sex_conc1 = data %>% 
     filter(sex == sex1, concentration == conc)
   
   #Making graph
@@ -55,28 +55,21 @@ line_graph = function(data, sex, conc) {
       plot.title = element_text(hjust = 0.5, size=25),
       legend.title = element_text(size=15),
       legend.text = element_text(size=12))
+  
+  return(sex_conc1_plot)
 }
 
 
-#Plug in variables and make graphs 
-a = line_graph(df_line_graph, "Female", conc1)
-b = line_graph(df_line_graph, "Female", conc2)
-c = line_graph(df_line_graph, "Male", conc1)
-d = line_graph(df_line_graph, "Male", conc2)
+###Create box plot with dots to visulize mean survival across all the lines 
+###at one concentration, exposure, and sex at a time
 
-###combine all 4 plots all with its own legend
-combined_plot = plot_grid(a, b, c, d, nrow=2)
-
-
-#######
-
-#Create box plot with dots 
-#Input: data, sex, exposure and concentration with maximum variation
+#Create box plot functions
 box_plot = function(data, sex, exp, conc) {
   
   #Create Graph Title
   graph_title_conc = sub(" ","",paste(toString(conc), 'mM'))
-  graph_title = paste(toString(sex), graph_title_conc)
+  graph_title_exp = sub(" ","",paste(toString(exp), 'hr'))
+  graph_title = paste(toString(sex), graph_title_conc, graph_title_exp)
   
   
   #Filtering based on data
@@ -100,3 +93,23 @@ box_plot = function(data, sex, exp, conc) {
 }
 
 
+######Applying functions
+
+###Update variables:
+conc1 = 0.8
+conc2 = 1.5
+female = "Female"
+male = "Male"
+
+#Apply line graph. Input: df_line_graph, sex, concentrations
+a = line_graph(df_line_graph, female, conc1)
+b = line_graph(df_line_graph, female, conc2)
+c = line_graph(df_line_graph, male, conc1)
+d = line_graph(df_line_graph, male, conc2)
+
+#Combine all 4 line plots all with each plot having its own legend
+combined_plot = plot_grid(a, b, c, d, nrow=2)
+
+#Apply Box plot. Input: data, sex, exposure and concentration with maximum variation
+e = box_plot(data, female, 48, conc1)
+f = box_plot(data, male, 24, conc1)
