@@ -10,7 +10,7 @@ library(gridExtra)
 
 
 ######Read in raw data
-data = read.csv("/data/mackanholt_lab/yp/local_chemical_acute_screen/arsenic/17data_R.csv")
+data = read.csv("/data/mackanholt_lab/yp/chemical_acute_exposure/acute_exp_sample_data.csv")
 
 #Format data: convert "Line" from numeric to factor for graphs 
 data$line = as.factor(data$line)
