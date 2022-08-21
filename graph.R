@@ -72,10 +72,11 @@ box_plot = function(data, sex, exp, conc) {
   graph_title = paste(toString(sex), graph_title_conc, graph_title_exp)
   
   
-  #Filtering based on data
+  #Filtering based on selected data
   df_boxplot = data %>% 
     filter(exposure == exp, sex == sex, concentration == conc)
   
+  #Create graph
   boxplot = ggplot(data = df_boxplot, aes(x=line, y=survival_proportion, color=line)) +
     geom_boxplot() +
     geom_point() + 
